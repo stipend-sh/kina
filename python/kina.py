@@ -33,14 +33,28 @@ _UNLETTERS = {v: k for k, v in _LETTERS.items()}
 _TOKEN = re.compile(r"([a-z]+(?:'[a-z]+)*)")
 
 
+def _code(i):
+    """The code for the word at index i.
+
+    One syllable for the first 49 words, two for the next 2,450, three after
+    that. A word's index is its identity: appending is safe, reordering is not.
+    """
+    n, s = len(_POOL), len(SYLLABLES)
+    if i < n:
+        return _POOL[i]
+    i -= n
+    if i < n * s:
+        return _POOL[i // s] + SYLLABLES[i % s]
+    i -= n * s
+    if i < n * s * s:
+        return _POOL[i // (s * s)] + SYLLABLES[(i // s) % s] + SYLLABLES[i % s]
+    raise ValueError("past %d words" % (n + n * s + n * s * s))
+
+
 def _build():
     to_kina, from_kina = {}, {}
     for i, word in enumerate(WORDS):
-        if i < len(_POOL):
-            code = _POOL[i]
-        else:
-            j = i - len(_POOL)
-            code = _POOL[j // len(SYLLABLES)] + SYLLABLES[j % len(SYLLABLES)]
+        code = _code(i)
         to_kina[word] = code
         from_kina[code] = word
     return to_kina, from_kina

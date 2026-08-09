@@ -30,14 +30,22 @@
     WORDS = text.split(/\r?\n/).map(function (s) { return s.trim(); })
                 .filter(function (s) { return s.length; });
     toKina = {}; fromKina = {};
+    /* One syllable for the first 49 words, two for the next 2,450, three after
+       that. A word's index is its identity: appending is safe, reordering is
+       not. Stopping at two ranks does not truncate the table -- it makes
+       POOL[49] undefined and files every later word under a colliding key. */
+    function codeFor(i) {
+      var n = POOL.length, s = SYLLABLES.length;
+      if (i < n) return POOL[i];
+      i -= n;
+      if (i < n * s) return POOL[Math.floor(i / s)] + SYLLABLES[i % s];
+      i -= n * s;
+      return POOL[Math.floor(i / (s * s))] +
+             SYLLABLES[Math.floor(i / s) % s] +
+             SYLLABLES[i % s];
+    }
     WORDS.forEach(function (word, n) {
-      var code;
-      if (n < POOL.length) {
-        code = POOL[n];
-      } else {
-        var j = n - POOL.length;
-        code = POOL[Math.floor(j / SYLLABLES.length)] + SYLLABLES[j % SYLLABLES.length];
-      }
+      var code = codeFor(n);
       toKina[word] = code;
       fromKina[code] = word;
     });

@@ -27,10 +27,18 @@ Let `WORDS` be the frozen list in `words.txt`, zero-indexed.
 For the word at index `i`:
 
 - if `i < 49` the code is `POOL[i]` — one syllable
-- otherwise, with `j = i - 49`, the code is `POOL[j // 50] + SYLLABLES[j % 50]`
-  — two syllables
+- otherwise, with `j = i - 49`: if `j < 2450` the code is
+  `POOL[j // 50] + SYLLABLES[j % 50]` — two syllables
+- otherwise, with `k = j - 2450`, the code is
+  `POOL[k // 2500] + SYLLABLES[(k // 50) % 50] + SYLLABLES[k % 50]`
+  — three syllables
 
-That gives 49 one-syllable words and 2,450 two-syllable words: 2,499 in total.
+That gives 49 one-syllable, 2,450 two-syllable and 122,500 three-syllable
+words: 124,999 in total.
+
+The two-syllable arithmetic is exactly what it always was, so the third rank
+changes no existing code. It only says what happens past the point where the
+encoding used to stop.
 
 ## Words not in the dictionary
 
